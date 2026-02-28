@@ -83,6 +83,8 @@ class HomeScreen extends StatelessWidget {
             // Buttons
             const Text('TRACKER', style: TextStyle(fontSize: 12, letterSpacing: 2, fontWeight: FontWeight.bold, color: Colors.grey)),
             const SizedBox(height: 10),
+
+            // Steps button
             _TrackerButton(
               icon: '👟',
               label: 'Steps Tracker',
@@ -90,9 +92,15 @@ class HomeScreen extends StatelessWidget {
               color: Colors.blue,
               onTap: (){
                 // navigation
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const StepsScreen()),
+                  );
               },
             ),
             const SizedBox(height: 10),
+
+            // Water Button
             _TrackerButton(
               icon: '💧',
               label: 'Water Intake',
@@ -100,6 +108,10 @@ class HomeScreen extends StatelessWidget {
               color: Colors.green,
               onTap: (){
                 // navigation
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WaterScreen()),
+                  );
               },
             ),
           ],
@@ -194,6 +206,42 @@ class _TrackerButton extends StatelessWidget {
             const Icon(Icons.chevron_right, color: Colors.grey),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// place holder - steps screen
+class StepsScreen extends StatelessWidget {
+  const StepsScreen ({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Steps Tracker'),
+        centerTitle: true,
+      ),
+      body: const Center(
+        child: Text('Coming soon!'),
+      ),
+    );
+  }
+}
+
+// place holder - water screen
+class WaterScreen extends StatelessWidget {
+  const WaterScreen ({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Water Intake'),
+        centerTitle: true,
+      ),
+      body: const Center(
+        child: Text('Coming soon!'),
       ),
     );
   }
