@@ -590,9 +590,83 @@ class _StepsScreenState extends State<StepsScreen> {
   }
 }
 
-// place holder - water screen
-class WaterScreen extends StatelessWidget {
-  const WaterScreen ({super.key});
+// Water Screen
+class WaterScreen extends StatefulWidget {
+  const WaterScreen({super.key});
+
+  @override
+  State<WaterScreen> createState() => _WaterScreenState();
+}
+
+class _WaterScreenState extends State<WaterScreen> {
+  final List<WaterEntry> _water = [];
+  final TextEditingController _waterController = TextEditingController();
+  DateTime? _selectedDate;
+
+  // Date picker
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+    }
+  }
+
+  // Check duplicate date
+  bool _dateExists(DateTime date) {
+    return _water.any((e) =>
+      e.date.year == date.year &&
+      e.date.month == date.month &&
+      e.date.day == date.day
+    );
+  }
+
+  void _addEntry() {
+    if (_selectedDate == null || _waterController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields.')),
+      );
+      return;
+    }
+
+    final liters = double.tryParse(_waterController.text);
+    if (liters == null || liters < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid amount.')),
+      );
+      return;
+    }
+
+    if (_dateExists(_selectedDate!)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An entry for this date already exists!')),
+      );
+      return;
+    }
+
+    setState(() {
+      _water.add(WaterEntry(date: _selectedDate!, liters: liters));
+      _water.sort((a, b) => b.date.compareTo(a.date));
+      _waterController.clear();
+      _selectedDate = null;
+    });
+  }
+
+  // Helpers
+  Color _labelColor(String label) {
+    if (label == 'Good') return Colors.green;
+    if (label == 'Average') return Colors.orange;
+    return Colors.red;
+  }
+
+  String _formatDate(DateTime date) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -601,9 +675,157 @@ class WaterScreen extends StatelessWidget {
         title: const Text('Water Intake'),
         centerTitle: true,
       ),
-      body: const Center(
-        child: Text('Coming soon!'),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            // Add Entry Form 
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.green.withOpacity(0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('ADD ENTRY', style: TextStyle(fontSize: 11, letterSpacing: 2, color: Colors.grey)),
+                  const SizedBox(height: 12),
+
+                  // Date picker
+                  GestureDetector(
+                    onTap: _pickDate,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.07),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.white.withOpacity(0.12)),
+                      ),
+                      child: Text(
+                        _selectedDate == null
+                            ? 'Tap to select date'
+                            : _formatDate(_selectedDate!),
+                        style: TextStyle(
+                          color: _selectedDate == null ? Colors.grey : Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Water input
+                  TextField(
+                    controller: _waterController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      hintText: 'Amount in liters (e.g. 1.5)',
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.07),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.white.withOpacity(0.12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Add button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _addEntry,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('+ Add Entry', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Entries List
+            Text(
+              'ENTRIES (${_water.length})',
+              style: const TextStyle(fontSize: 11, letterSpacing: 2, color: Colors.grey),
+            ),
+            const SizedBox(height: 10),
+
+            if (_water.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32),
+                  child: Text(
+                    'No entries yet.\nStart tracking your water intake!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+
+            ..._water.map((entry) => Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.04),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _formatDate(entry.date),
+                        style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${entry.liters} L',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: _labelColor(entry.label).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: _labelColor(entry.label).withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      entry.label,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: _labelColor(entry.label),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )),
+          ],
+        ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _waterController.dispose();
+    super.dispose();
   }
 }
