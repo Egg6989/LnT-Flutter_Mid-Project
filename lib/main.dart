@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'screens.dart';
+import 'models.dart';
 // Flutter Mid-Project: Fitness Tracker
 
 void main() {
@@ -14,11 +16,9 @@ class MainApp extends StatelessWidget {
       title: 'MyFit - Fitness Tracker',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('MyFit'),),
-        body: Center(
-          child: Text('Hello there!',),
-        ),
+      home: HomeScreen(
+          numSteps: const [],
+          water: const [],
       ),
     );
   }
