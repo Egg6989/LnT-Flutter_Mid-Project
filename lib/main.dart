@@ -17,7 +17,7 @@ class MainApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('MyFit'),),
         body: Center(
-          child: Text('Hello there!'),
+          child: Text('Hello there!',),
         ),
       ),
     );
